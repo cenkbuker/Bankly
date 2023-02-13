@@ -41,7 +41,8 @@ router.get('/:username', authUser, requireLogin, async function(
   next
 ) {
   try {
-    let user = await User.get(req.params.username);
+    //getall
+    let user = await User.getAll();
     return res.json({ user });
   } catch (err) {
     return next(err);
@@ -63,7 +64,8 @@ router.get('/:username', authUser, requireLogin, async function(
  *
  */
 
-router.patch('/:username', authUser, requireLogin, requireAdmin, async function(
+router.patch('/:username', authUser, requireLogin, async function(
+  //wwron usage of admin check
   req,
   res,
   next
@@ -76,7 +78,12 @@ router.patch('/:username', authUser, requireLogin, requireAdmin, async function(
     // get fields to change; remove token so we don't try to change it
     let fields = { ...req.body };
     delete fields._token;
-
+    const ok_fields = ['first_name', 'last_name', 'phone', 'email'];
+    for (let key in fields) {
+      if (!ok_fields.includes(key)) {
+        throw new ExpressError(`Can't change ${key}`, 401);
+      }
+    }
     let user = await User.update(req.params.username, fields);
     return res.json({ user });
   } catch (err) {
@@ -100,7 +107,7 @@ router.delete('/:username', authUser, requireAdmin, async function(
   next
 ) {
   try {
-    User.delete(req.params.username);
+    await User.delete(req.params.username);
     return res.json({ message: 'deleted' });
   } catch (err) {
     return next(err);

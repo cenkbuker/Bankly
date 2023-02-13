@@ -43,4 +43,4 @@ function minuteCheck(str){
     }
     return output
 }
-module.exports = {timeword}
+module.exports = timeword
