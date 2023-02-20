@@ -1,46 +1,93 @@
 "use strict";
-let output=''
-const count = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty one", "twenty two", "twenty three", "twenty four", "twenty five", "twenty six", "twenty seven", "twenty eight", "twenty nine", "thirty"]
-const decimals= [,,"twenty","thirty","forty","fifty"]
-function timeword(str){
-    if(+str[0]===1 && +str[1]===2 && +str[3]===0 && +str[4]==0) return 'noon'
-    if(+str[0]===0 && +str[1]===0 && +str[3]===0 && +str[4]==0) return 'midnight'
-    if(+str[0]===0){
-        output += count[+str[1]]
-        minuteCheck(str)
-    }
-    if(+str[0]===1){
-        output += count[+str[1]+10]
-        minuteCheck(str)
-    }if(+str[0]===2){
-        output += count[+str[1]+20]
-        minuteCheck(str)
-    }
+const count = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+  "twenty one",
+  "twenty two",
+  "twenty three",
+  "twenty four",
+  "twenty five",
+  "twenty six",
+  "twenty seven",
+  "twenty eight",
+  "twenty nine",
+  "thirty",
+];
+const decimals = [, , "twenty", "thirty", "forty", "fifty"];
 
-    if((str[0]>0 && str[1]>1)||(str[0]>1)){
-        output +=' pm'
-    }else{
-        output+=' am' 
-    }
-    return output
+function getNumberOfDecades(number) {
+  return Math.floor(number / 10);
 }
 
-function minuteCheck(str){
-    if(+str[3]===0){
-        if(+str[4]===0){
-           return output += ' oclock'
-        }
-        output +=' oh '+count[+str[4]]
-        
-    }
-    if(+str[3]===1){
-        output += ' '+count[+str[4]+10]
-    }if(+str[3]>1){
-        output+= ' '+decimals[+str[3]]
-        if(+str[4]!==0){
-            output+= ' '+count[+str[4]]
-        }
-    }
-    return output
+function getRestOfDivisionWith10(number) {
+  return number % 10;
 }
-module.exports = timeword
+function addToString(parent, child, space = true) {
+  return `${parent}${space ? " " : ""}${child}`;
+}
+function timeword(str) {
+  let output = "";
+
+  if (str === "12:00") return "noon";
+  if (str === "00:00") return "midnight";
+  const [hourStr, minuteStr] = str.split(":");
+  const hour = +hourStr;
+  const minute = +minuteStr;
+  const decades = getNumberOfDecades(hour);
+  const divisionWith10 = getRestOfDivisionWith10(hour);
+
+  if (hour === 0) {
+    output = addToString(output, "twelve", false);
+  } else if (hour <= 12) {
+    output = addToString(output, count[hour], false);
+  } else {
+    output = addToString(
+      output,
+      count[(decades - 1) * 10 + divisionWith10 - 2],
+      false
+    );
+  }
+
+  output = addToString(output, minuteCheck(minute), false);
+  output = addToString(output, hour >= 12 ? "pm" : "am");
+  return output;
+}
+
+function minuteCheck(minute) {
+  let output = "";
+  if (!minute) {
+    output += " o'clock";
+  } else if (minute < 10) {
+    output += " oh " + count[minute];
+  } else if (minute < 20 && minute >= 10) {
+    output += " " + count[minute];
+  } else {
+    output += " " + decimals[getNumberOfDecades(minute)];
+    const divisionWith10 = getRestOfDivisionWith10(minute);
+    if (divisionWith10) {
+      output += " " + count[divisionWith10];
+    }
+  }
+
+  return output;
+}
+module.exports = timeword;
